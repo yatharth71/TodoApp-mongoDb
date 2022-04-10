@@ -1,8 +1,32 @@
 import Head from "next/head";
 import Image from "next/image";
+import { useState, useEffect } from "react";
 import styles from "../styles/Home.module.css";
 
 export default function Home() {
+  const [todo, setTodo] = useState("");
+  const [todos, setTodos] = useState([]);
+
+  const addTodo = async () => {
+    const data = await fetch("/api/createTodo", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ desc: todo }),
+    });
+  };
+
+  const getTodos = async () => {
+    const response = await fetch("/api/getTodos");
+    const data = await response.json();
+    setTodos(data.todos);
+  };
+
+  useEffect(() => {
+    getTodos();
+  }, []);
+
   return (
     <div className={styles.container}>
       <Head>
@@ -11,47 +35,49 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-      <div className="h-100 w-full flex items-center justify-center bg-teal-lightest font-sans text-xl">
-        <div className="bg-white rounded shadow p-6 m-4 w-full lg:w-3/4 lg:max-w-lg">
-          <div className="mb-4">
-            <h1 className="text-grey-darkest font-bold text-xl">Todo List</h1>
-            <div className="flex mt-4">
-              <input
-                className="shadow appearance-none border rounded w-full py-2 px-3 mr-4 text-grey-darker"
-                placeholder="Add Todo"
-              />
-              <button className="flex-no-shrink p-2 border-2 rounded text-teal border-teal hover:text-white hover:bg-teal">
-                Add
-              </button>
+        <div className="h-100 w-full flex items-center justify-center bg-teal-lightest font-sans text-xl">
+          <div className="bg-white rounded shadow p-6 m-4 w-full lg:w-3/4 lg:max-w-lg">
+            <div className="mb-4">
+              <h1 className="text-grey-darkest font-bold text-2xl">
+                Todo List
+              </h1>
+              <div className="flex mt-4">
+                <input
+                  className="shadow appearance-none border rounded w-full py-2 px-3 mr-4 text-grey-darker hover:border-gray-400"
+                  placeholder="Add Todo"
+                  value={todo}
+                  onChange={(e) => setTodo(e.target.value)}
+                />
+                <button
+                  className="flex-no-shrink p-2 border-2 rounded text-teal border-teal hover:text-slate-800 hover:bg-teal hover:border-gray-400"
+                  onClick={addTodo}
+                >
+                  Add
+                </button>
+              </div>
             </div>
-          </div>
-          <div>
-            <div className="flex mb-4 items-center">
-              <p className="w-full text-grey-darkest">
-                Add another component to Tailwind Components
-              </p>
-              <button className="flex-no-shrink p-2 ml-4 mr-2 border-2 rounded hover:text-white text-green border-green hover:bg-green">
-                Done
-              </button>
-              <button className="flex-no-shrink p-2 ml-2 border-2 rounded text-red border-red hover:text-white hover:bg-red">
-                Remove
-              </button>
-            </div>
-            <div className="flex mb-4 items-center">
-              <p className="w-full line-through text-green">
-                Submit Todo App Component to Tailwind Components
-              </p>
-              <button className="flex-no-shrink p-2 ml-4 mr-2 border-2 rounded hover:text-white text-grey border-grey hover:bg-grey">
-                Not Done
-              </button>
-              <button className="flex-no-shrink p-2 ml-2 border-2 rounded text-red border-red hover:text-white hover:bg-red">
-                Remove
-              </button>
+            <div>
+              {Object.keys("todos").length > 0 ? (
+                todos.map((todo) => {
+                  return (
+                    <div className="flex mb-4 items-center" key={todo._id}>
+                      <p className="w-full text-grey-darkest">{todo.desc}</p>
+                      <button className="flex-no-shrink p-2 ml-4 mr-2 border-2 rounded hover:text-white text-green border-green hover:bg-green">
+                        Done
+                      </button>
+                      <button className="flex-no-shrink p-2 ml-2 border-2 rounded text-red border-red hover:text-white hover:bg-red">
+                        Remove
+                      </button>
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-grey-darkest">No todos yet</p>
+              )}
             </div>
           </div>
         </div>
-      </div>
-    </main>
+      </main>
     </div>
   );
 }
