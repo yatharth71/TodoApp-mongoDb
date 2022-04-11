@@ -15,6 +15,7 @@ export default function Home() {
       },
       body: JSON.stringify({ desc: todo }),
     });
+    setTodo("");
   };
 
   const getTodos = async () => {
@@ -25,7 +26,7 @@ export default function Home() {
 
   useEffect(() => {
     getTodos();
-  }, []);
+  }, [todos]);
 
   return (
     <div className={styles.container}>
@@ -61,11 +62,43 @@ export default function Home() {
                 todos.map((todo) => {
                   return (
                     <div className="flex mb-4 items-center" key={todo._id}>
-                      <p className="w-full text-grey-darkest">{todo.desc}</p>
-                      <button className="flex-no-shrink p-2 ml-4 mr-2 border-2 rounded hover:text-white text-green border-green hover:bg-green">
+                      <p className="w-full text-grey-darkest" id="myTodo">
+                        {todo.desc}
+                      </p>
+                      <span
+                        className="text-red-700 ml-[10px] md:ml-0 lg:ml-0"
+                        id="todoStatus"
+                      >
+                        Not Done
+                      </span>
+                      <button
+                        className="flex-no-shrink p-2 ml-4 mr-2 border-2 rounded hover:text-white text-green border-green hover:bg-green"
+                        onClick={() => {
+                          document.getElementById(
+                            "myTodo"
+                          ).innerHTML = `<del>${todo.desc}</del>`;
+                          document.getElementById("todoStatus").innerHTML =
+                            "Done";
+                          document
+                            .getElementById("todoStatus")
+                            .classList.add("text-green-700");
+                        }}
+                      >
                         Done
                       </button>
-                      <button className="flex-no-shrink p-2 ml-2 border-2 rounded text-red border-red hover:text-white hover:bg-red">
+                      <button
+                        className="flex-no-shrink p-2 ml-2 border-2 rounded text-red border-red hover:text-white hover:bg-red"
+                        onClick={async () => {
+                          const data = await fetch("/api/removeTodo", {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({ id: todo._id }),
+                          });
+                          setTodo("");
+                        }}
+                      >
                         Remove
                       </button>
                     </div>
